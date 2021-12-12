@@ -32,6 +32,7 @@ typedef struct tagPIEMU_CONTEXT
     SDL_Renderer *renderer;
     SDL_Texture *texture;
     SDL_Joystick *pad; // only for PSP
+    SDL_GameController *controller;
     SDL_AudioDeviceID audio_device;
 
 

@@ -127,7 +127,11 @@ int main(int argc, char *argv[])
     thDevicesThread = SDL_CreateThread(emu_devices_work, "piemu-devices", &context);
 
     if (SDL_NumJoysticks() > 0) {
-        context.pad = SDL_JoystickOpen(0);
+        if (!SDL_IsGameController(0)) {
+            context.pad = SDL_JoystickOpen(0);
+        } else {
+            context.controller = SDL_GameControllerOpen(0);
+        }
     }
 
     unsigned nMSecPerFrame = 1000 / context.o_fps;
@@ -174,6 +178,32 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (context.controller != NULL && SDL_GameControllerGetAttached(context.controller)) {
+            int Up = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_UP);
+            context.keystate[KEY_UP] = Up | context.keystate[KEY_UP];
+
+            int Down = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+            context.keystate[KEY_DOWN] = Down | context.keystate[KEY_DOWN];
+
+            int Left = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+            context.keystate[KEY_LEFT] = Left | context.keystate[KEY_LEFT];
+
+            int Right = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+            context.keystate[KEY_RIGHT] = Right | context.keystate[KEY_RIGHT];
+
+            int Start = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_START);
+            context.keystate[KEY_START] = Start | context.keystate[KEY_START];
+
+            int Back = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_BACK);
+            context.keystate[KEY_SELECT] = Back | context.keystate[KEY_SELECT];
+
+            int AButton = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_A);
+            context.keystate[KEY_A] = AButton | context.keystate[KEY_A];
+
+            int BButton = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_B);
+            context.keystate[KEY_B] = BButton | context.keystate[KEY_B];
+        }
+
         /* 画面更新。 */
         lcdc_conv(&context, context.vbuff);
         context.pfnUpdateScreen(&context, context.pUser);
@@ -203,6 +233,8 @@ int main(int argc, char *argv[])
 
     if (context.pad != NULL && SDL_JoystickGetAttached(context.pad))
         SDL_JoystickClose(context.pad);
+    if (context.controller != NULL && SDL_GameControllerGetAttached(context.controller))
+        SDL_GameControllerClose(context.controller);
     if(context.audio_device > 0)
         SDL_CloseAudioDevice(context.audio_device);
 
