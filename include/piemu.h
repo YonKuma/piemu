@@ -35,6 +35,10 @@ typedef struct tagPIEMU_CONTEXT
     SDL_GameController *controller;
     SDL_AudioDeviceID audio_device;
 
+    // Hotkeys
+    int holdingQuit;
+    int awaitingQuitConfirm;
+    int quitTimer;
 
     int bEndFlag;
 

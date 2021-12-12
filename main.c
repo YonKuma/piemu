@@ -180,28 +180,50 @@ int main(int argc, char *argv[])
 
         if (context.controller != NULL && SDL_GameControllerGetAttached(context.controller)) {
             int Up = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_UP);
-            context.keystate[KEY_UP] = Up | context.keystate[KEY_UP];
+            context.keystate[KEY_UP] = Up;
 
             int Down = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-            context.keystate[KEY_DOWN] = Down | context.keystate[KEY_DOWN];
+            context.keystate[KEY_DOWN] = Down;
 
             int Left = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-            context.keystate[KEY_LEFT] = Left | context.keystate[KEY_LEFT];
+            context.keystate[KEY_LEFT] = Left;
 
             int Right = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-            context.keystate[KEY_RIGHT] = Right | context.keystate[KEY_RIGHT];
+            context.keystate[KEY_RIGHT] = Right;
 
             int Start = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_START);
-            context.keystate[KEY_START] = Start | context.keystate[KEY_START];
+            context.keystate[KEY_START] = Start;
 
             int Back = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_BACK);
-            context.keystate[KEY_SELECT] = Back | context.keystate[KEY_SELECT];
+            context.keystate[KEY_SELECT] = Back;
 
             int AButton = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_A);
-            context.keystate[KEY_A] = AButton | context.keystate[KEY_A];
+            context.keystate[KEY_A] = AButton;
 
             int BButton = SDL_GameControllerGetButton(context.controller, SDL_CONTROLLER_BUTTON_B);
-            context.keystate[KEY_B] = BButton | context.keystate[KEY_B];
+            context.keystate[KEY_B] = BButton;
+        }
+
+        if (context.keystate[KEY_SELECT] && context.keystate[KEY_START]) {
+            if (context.awaitingQuitConfirm) {
+                goto L_EXIT;
+            } else {
+                context.holdingQuit = 1;
+            }
+        }
+
+        if (context.holdingQuit && ((!context.keystate[KEY_SELECT]) || (!context.keystate[KEY_START]))) {
+            context.holdingQuit = 0;
+            context.awaitingQuitConfirm = 1;
+            context.quitTimer = 60;
+        }
+
+        if (context.quitTimer > 0) {
+            context.quitTimer--;
+        }
+
+        if (context.quitTimer == 0) {
+            context.awaitingQuitConfirm = 0;
         }
 
         /* 画面更新。 */
